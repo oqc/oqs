@@ -4,6 +4,7 @@ module RefParser (
 
 
 import Text.ParserCombinators.Parsec
+import Test.HUnit
 import Test.Hspec
 
 import Types
@@ -24,7 +25,8 @@ refRngByChapter :: GenParser Char st [QRefRng]
 refRngByChapter = do c <- many digit
                      char ':'
                      vs <- verses
-                     return $ map (qRefRng (read c)) vs
+                     rrs <- mapM (qRefRng $ read c) vs
+                     return $ rrs
 
 verses :: (Integral i, Read i) => GenParser Char st [(i, i)]
 verses = sepEndBy1 verseNrOrRange (spaces >> char ',' >> spaces) >>= return
@@ -65,14 +67,16 @@ main = hspec $ do
 
   describe "refGrpByChapter" $ do
     it "should parse a simple reference group appropriately" $
-      testParser refRngByChapter "1:1,2,3" [qRefRng 1 (1, 1), qRefRng 1 (2, 2), qRefRng 1 (3, 3)]
+      testParser refRngByChapter "1:1,2,3"
+        [qRefRng_ 1 (1, 1), qRefRng_ 1 (2, 2), qRefRng_ 1 (3, 3)]
     it "should parse a reference group with verse range appropriately" $
-      testParser refRngByChapter "1:1,2,3-6,7" [qRefRng 1 (1, 1), qRefRng 1 (2, 2), qRefRng 1 (3, 6), qRefRng 1 (7, 7)]
+      testParser refRngByChapter "1:1,2,3-6,7"
+        [qRefRng_ 1 (1, 1), qRefRng_ 1 (2, 2), qRefRng_ 1 (3, 6), qRefRng_ 1 (7, 7)]
 
   describe "refString" $ do
     it "should parse complex ref strings appropriately" $
       testParser refString "1:1,2, 2:18, 3:100-103"
-                 [qRefRng 1 (1, 1), qRefRng 1 (2, 2), qRefRng 2 (18, 18), qRefRng 3 (100, 103)]
+        [qRefRng_ 1 (1, 1), qRefRng_ 1 (2, 2), qRefRng_ 2 (18, 18), qRefRng_ 3 (100, 103)]
 
   where testParser p str succ = case parse p "" str of Left  _ -> False
                                                        Right x -> x == succ

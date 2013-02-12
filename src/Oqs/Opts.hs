@@ -85,10 +85,10 @@ options =
   , Option ['B'] ["grp-big"] (NoArg (\o -> return o { optGrpStyle = BigBreaks }))
                              "Group verses on big breaks (and renges)."
   , Option ['A'] ["grp-all"] (NoArg (\o -> return o { optGrpStyle = AllBreaks }))
-                             "Group verses on all beaks (and ranges)."
+                             "Group verses on all breaks (and ranges)."
   , Option ['I'] ["grp-ref"] (NoArg (\o -> return o { optGrpStyle = ByVerse }))
                              "Group verses individually."
-  , Option ['V'] ["version"] (NoArg (\_ -> do hPutStrLn stdout $ "Version 0.0.2"
+  , Option ['V'] ["version"] (NoArg (\_ -> do hPutStrLn stdout $ "Version 0.0.3"
                                               exitWith ExitSuccess))
                              "Only show version number and exit."
   , Option ['h'] ["help"]    (NoArg (\_ -> do printUsageInfo
