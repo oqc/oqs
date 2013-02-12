@@ -17,6 +17,10 @@ import Data.Text ( Text, lines, unlines, pack, unpack )
 import Data.Text.IO
 import Data.Maybe ( listToMaybe )
 
+import Data.Aeson ( FromJSON, encode, object, (.=) )
+{- import Data.Aeson.Encode.Pretty ( prettyEncode )-}
+import qualified Data.ByteString.Lazy.Char8 as BL
+
 import Opts
 import Types
 import RefParser
@@ -39,9 +43,10 @@ main = do
       qtfs <- readQtfFiles files
       qpf  <- readQpfFile  (optQpfFile opts)
 
-      hPutStrLn stdout $ pack $ show $
-         map (\refRng -> (show refRng, map (\qtf -> rngToQlf qpf (optBrkStyle opts) qtf refRng) qtfs))
-             (concat $ map (applyGrpStyle (optGrpStyle opts) qpf) refRngs)
+      let result = map (\refRng -> (show refRng, map (\qtf -> rngToQlf qpf (optBrkStyle opts) qtf refRng) qtfs))
+                       (concat $ map (applyGrpStyle (optGrpStyle opts) qpf) refRngs)
+
+      BL.putStrLn $ (encode . object) (map (\(k, v) -> (pack k) .= v) result)
 
       exitWith $ ExitSuccess
 
@@ -86,6 +91,5 @@ applyGrpStyle grpStyle qpf refRng = case grpStyle of
 
 
 {- Feature ideas:
- -  * error when >300 verses are requested
- -  * JSON output
+ -  * continuation marker when >300 verses are requested
  -}
