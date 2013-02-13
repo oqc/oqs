@@ -15,6 +15,17 @@ It is implemented after design goals:
 This project is very much a work in progress.
 
 
+## TODO
+
+* Go Yesod...
+* Create query handler :)
+* Make Yesod to accept pings from github post commits hooks
+* On ping try to (re)load all QTF and QPF files
+* Keep all used URLs (repos and files) up-to-date in a plaintext file,
+  for "rebooting" or "total refresh"
+* Make local backups
+* Add metadata to JSON output (low)
+
 
 ## License
 
