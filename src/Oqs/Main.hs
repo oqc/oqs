@@ -52,7 +52,7 @@ main = do
 
 
 readQtfFiles :: [String] -> IO [QLines Text]  -- TODO: handle IO and parse exceptions
-readQtfFiles files = do mapM readFile files >>= mapM (qLines . lines) >>= return
+readQtfFiles files = mapM readFile files >>= mapM (qLines . lines) >>= return
 
 readQpfFile :: String -> IO (QLines Int)
 readQpfFile qpfFileName = do
@@ -65,9 +65,9 @@ readQpfFile qpfFileName = do
 
 rngToQlf :: QLines Int -> Bool -> QLines Text -> QRefRng -> Text
 rngToQlf qpf brkStyle qtf refRng = T.concat $
-  weave3 (map (\rng -> pack $ "\\nr{" ++ (show $ fstToRef rng) ++ "} ") $ splitRngByVerses refRng)
+  weave3 (map (\rng -> pack $ "\\nr{" ++ show rng ++ "} ") $ splitRngByVerses refRng)
          (fromQLines qtf refRng)
-         (map (brkToText . head . fromQLines qpf) $ init (splitRngByVerses refRng))
+         (map (brkToText . head . fromQLines qpf) $ (init . splitRngByVerses) refRng)
   where
     weave3 :: [a] -> [a] -> [a] -> [a]
     weave3 []     _      _      = []  -- ys and zs are woven into xs, so empty

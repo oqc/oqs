@@ -24,6 +24,7 @@ This project is very much a work in progress.
 * Keep all used URLs (repos and files) up-to-date in a plaintext file,
   for "rebooting" or "total refresh"
 * Make local backups
+* Do [this](http://bradleyfew.com/github-powered-comments/)
 * Add metadata to JSON output (low)
 
 

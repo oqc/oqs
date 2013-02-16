@@ -1,26 +1,18 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Types (
-  QRef
-, qRef
-, qRef_
-, unQRef
-, verse
-, qRefToLineNr
-
-, QRefRng
+  QRefRng
 , qRefRng
 , qRefRng_
 , unQRefRng
+, chapter
 , fstVerse
 , lstVerse
-, fstToRef
 , verseList
+, qRefRngToLineNr
 , qRefRngToLineNrs
 , splitRngByVerses
 , splitRngByPars
-
-, chap
 
 , QLines
 , qLines
@@ -32,38 +24,11 @@ module Types (
 import Test.Hspec
 
 
--- For single verse references like: "2:256"
-newtype QRef = MkQRef (Int, Int)
-  deriving ( Eq, Ord )
-instance Show QRef where
-  show (MkQRef (c, v)) = show c ++ ":" ++ show v
-instance HasChap QRef where
-  chap (MkQRef (c, _)) = c
-
-qRef :: Monad m => Int -> Int -> m QRef
-qRef c v  -- Programming errors here are no substitute for parser exceptions
-  | c < 1 || c > 114 || v < 1 || v > versesPerChapter !! c =
-                fail $ "Inexistant reference: " ++ (show $ MkQRef (c, v))
-  | otherwise = return $ MkQRef (c, v)
-qRef_ c v = MkQRef (c, v)
-
-unQRef :: QRef -> (Int, Int)
-unQRef (MkQRef (c, v)) = (c, v)
-
-verse :: QRef -> Int
-verse (MkQRef (_, v)) = v
-
-qRefToLineNr :: QRef -> Int
-qRefToLineNr (MkQRef (c, v)) = chapterOffset c + v
-
-
 -- For reference ranges like: "80:1-8"
 newtype QRefRng = MkQRefRng (Int, (Int, Int))
   deriving ( Eq, Ord )
 instance Show QRefRng where
   show (MkQRefRng (c, (v1, v2))) = show c ++ ":" ++ show v1 ++ (if v1 == v2 then  ""  else  "-" ++ show v2)
-instance HasChap QRefRng where
-  chap (MkQRefRng (c, _)) = c
 
 qRefRng :: Monad m => Int -> (Int, Int) -> m QRefRng
 qRefRng c (v1, v2)  -- Programming errors here are no substitute for parser exceptions
@@ -76,6 +41,9 @@ qRefRng_ c vs = MkQRefRng (c, vs)
 unQRefRng :: QRefRng -> (Int, (Int, Int))
 unQRefRng (MkQRefRng (c, (v1, v2))) = (c, (v1, v2))
 
+chapter ::QRefRng -> Int
+chapter (MkQRefRng (c, _)) = c
+
 fstVerse :: QRefRng -> Int
 fstVerse (MkQRefRng (_, (v1, _))) = v1
 
@@ -85,31 +53,26 @@ lstVerse (MkQRefRng (_, (_, v2))) = v2
 verseList :: QRefRng -> [Int]
 verseList (MkQRefRng (_, (v1, v2))) = [v1..v2]
 
-fstToRef :: QRefRng -> QRef
-fstToRef (MkQRefRng (c, (v, _))) = MkQRef (c, v)
+qRefRngToLineNr  :: QRefRng -> Int
+qRefRngToLineNr  (MkQRefRng (c, (v1, _)))  = v1 + chapterOffset c
 
 qRefRngToLineNrs :: QRefRng -> [Int]
 qRefRngToLineNrs (MkQRefRng (c, (v1, v2))) = map (chapterOffset c +) [v1..v2]
 
 splitRngByVerses :: QRefRng -> [QRefRng]
-splitRngByVerses rr = map (\v -> MkQRefRng (chap rr, (v, v))) $ verseList rr
+splitRngByVerses rr = map (\v -> MkQRefRng (chapter rr, (v, v))) $ verseList rr
 
 splitRngByPars :: (Int -> Bool) -> QLines Int -> QRefRng -> [QRefRng]
 splitRngByPars criterion qpf refRng =
   let markedPairs = zip (map criterion $ fromQLines qpf refRng)
                         (map (\x -> [x, x + 1]) $ verseList refRng)
-  in map (\vs -> qRefRng_ (chap refRng) vs)
+  in map (\vs -> qRefRng_ (chapter refRng) vs)
          (listToTuples ([fstVerse refRng] ++ (concat . (map snd) . (filter fst) . init $ markedPairs) ++ [lstVerse refRng]))
   where
     listToTuples :: [a] -> [(a, a)]
     listToTuples []       = []
     listToTuples [_]      = error "Odd lists should never occur"
     listToTuples (x:y:rs) = (x, y) : listToTuples rs
-
-
--- Because both QRef and QRefRng want to define the `chap` function
-class HasChap a where
-  chap :: a -> Int
 
 
 -- Any kind of resource that has 6236 lines (originals, translations, commentaries, break styles, etc.)
@@ -129,8 +92,6 @@ class QLinesSelector s where
   fromQLines :: QLines a -> s -> [a]
 instance QLinesSelector Int     where fromQLines (MkQLines ls) n  = [ls !! (n - 1)]
 instance QLinesSelector [Int]   where fromQLines (MkQLines ls) ns = map ((!!) ls . subtract 1) ns
-instance QLinesSelector QRef    where fromQLines (MkQLines ls) r  = [ls !! (qRefToLineNr r - 1)]
-instance QLinesSelector [QRef]  where fromQLines qls           rs = fromQLines qls $ map qRefToLineNr rs
 instance QLinesSelector QRefRng where fromQLines qls           rr = fromQLines qls $ qRefRngToLineNrs rr
 
 
@@ -161,19 +122,17 @@ versesPerChapter = [
 
 main = hspec $ do
 
-  describe "qRef" $ do it "" $ pending
-
-  describe "qRefToLineNr" $ do
+  describe "qRefRngToLineNr" $ do
     it "convert references to line numbers" $
       -- refToLineNr (114, 6) == 6236
-      let refEqualsLineNr (r, lineNr) = qRefToLineNr r == lineNr
+      let refEqualsLineNr (r, lineNr) = qRefRngToLineNr r == lineNr
       in foldr (&&) True $ map refEqualsLineNr $
-        [ (MkQRef (1, 1),   1)
-        , (MkQRef (2, 1),   8)
-        , (MkQRef (3, 1),   294)
-        , (MkQRef (3, 200), 493)
-        , (MkQRef (31, 6),  3475)
-        , (MkQRef (114, 6), 6236)
+        [ (MkQRefRng (1,   (1,   1)),     1)
+        , (MkQRefRng (2,   (1,   1)),     8)
+        , (MkQRefRng (3,   (1,   1)),   294)
+        , (MkQRefRng (3,   (200, 1)),   493)
+        , (MkQRefRng (31,  (6,   1)),  3475)
+        , (MkQRefRng (114, (6,   1)),  6236)
         ]
 
   describe "qRefRng" $ do it "" $ pending
@@ -187,7 +146,7 @@ main = hspec $ do
         , ((0 <), MkQLines (take 6236 [1, 1..]), MkQRefRng (1, (1, 3)), [MkQRefRng (1, (1, 1)), MkQRefRng (1, (2, 2)), MkQRefRng (1, (3, 3))])
         , ((0 <), MkQLines (take 6236 [1, 1..]), MkQRefRng (1, (5, 7)), [MkQRefRng (1, (5, 5)), MkQRefRng (1, (6, 6)), MkQRefRng (1, (7, 7))])
         , ((1 <), MkQLines (take 6236 [2, 2..]), MkQRefRng (2, (5, 7)), [MkQRefRng (2, (5, 5)), MkQRefRng (2, (6, 6)), MkQRefRng (2, (7, 7))])
-        , ((0 <), MkQLines ([0] ++ take 6235 [1, 1..]), MkQRefRng (1, (1, 3)), [MkQRefRng (1, (1, 2)), MkQRefRng (1, (3, 3))])
+        , ((0 <), MkQLines (take 6235 [i | i <- [0, 1, 2]]), MkQRefRng (1, (1, 3)), [MkQRefRng (1, (1, 2)), MkQRefRng (1, (3, 3))])
         ]
 
       {- foldr (&&) True $ map (\(crit, qpf, refRng, succ) -> (show $ splitRngByPars crit qpf refRng) == succ) [-}
