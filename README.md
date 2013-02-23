@@ -10,6 +10,7 @@ It is implemented after design goals:
 * understands reference queries (like: 1:1-4,2:256)
 * adheres to the [Quranic Data Formats](https://github.com/oqc/qdf)
 * serves JSON for consumption by all
+* integrate with GitHub for collaboration features
 * open source (AGPLv3)
 
 This project is very much a work in progress.
@@ -17,13 +18,9 @@ This project is very much a work in progress.
 
 ## TODO
 
-* Go Yesod...
-* Create query handler :)
 * Make Yesod to accept pings from github post commits hooks
-* On ping try to (re)load all QTF and QPF files
 * Keep all used URLs (repos and files) up-to-date in a plaintext file,
-  for "rebooting" or "total refresh"
-* Make local backups
+  for "rebooting" or "total refresh" (log file will also do)
 * Do [this](http://bradleyfew.com/github-powered-comments/)
 * Add metadata to JSON output (low)
 
