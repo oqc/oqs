@@ -19,9 +19,7 @@ import System.Directory ( getDirectoryContents )
 import Data.Text ( unpack, dropWhileEnd )
 import Data.Text.Encoding ( decodeUtf8 )
 import Data.IORef ( newIORef )
-import Data.Char ( digitToInt, chr )
 import Data.List ( isSuffixOf, head )
-import Data.Word ( Word8 )
 import System.FilePath (pathSeparator)
 import qualified Data.Map as M
 import qualified Data.ByteString as BS
