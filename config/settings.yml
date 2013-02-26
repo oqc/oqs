@@ -3,8 +3,7 @@ Default: &defaults
   port:      3000
   approot:   "http://localhost:3000"
   copyright: Content is owned by their respective owners.
-  qtfFiles:  ["data/en.pickthall.qtf"]
-  qpfFiles:  ["data/default.qpf"]
+  qdfPath:   "./data"
   #analytics: UA-YOURCODE
 
 Development:

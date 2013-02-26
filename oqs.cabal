@@ -80,6 +80,8 @@ library
                  , aeson
                  , containers
                  , base64-bytestring
+                 , split
+                 , filepath
                  , hqt                           >= 0.0.4
 
 executable oqs

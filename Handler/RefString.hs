@@ -34,7 +34,7 @@ getRefStringR refs = do
            Just xs -> map ((!) qtfMap) $ (T.split (== ',')) xs
 
       qpfMap <- liftIO $ readIORef $ getQpfMap yesod
-      paramParID <- lookupGetParam "t"
+      paramParID <- lookupGetParam "p"
       let qpf = case paramParID of
            Nothing -> head $ M.elems qpfMap
            Just x  -> qpfMap ! x
@@ -50,8 +50,15 @@ getRefStringR refs = do
       let result = map (\refRng -> (show refRng, map (\qtf -> qtfRngToQlf qpf defaultBrkToText qtf refRng) qtfs))
                        (concat $ map (applyGrpStyleToRng grpStyle qpf) refRngs)
 
-      (jsonToRepJson . object) (map (\(k, v) -> (T.pack k) .= v) result)
+      jsonToRepJson $ map (\(k, v) -> [toJSON k, toJSON v]) result
 
 
--- getIDsR :: Text -> Handler RepJson
+getIDsR :: Handler RepJson
+getIDsR = do
+  yesod <- getYesod
+  qtfMap <- liftIO $ readIORef $ getQtfMap yesod
+  qpfMap <- liftIO $ readIORef $ getQpfMap yesod
+  jsonToRepJson . object $ ["qtfs" .= (M.keys qtfMap), "qpfs" .= (M.keys qpfMap)]
+
+
 
