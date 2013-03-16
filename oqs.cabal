@@ -82,7 +82,7 @@ library
                  , base64-bytestring
                  , split
                  , filepath
-                 , hqt                           >= 0.0.4
+                 , hqt                           >= 0.0.5
 
 executable oqs
     if flag(library-only)

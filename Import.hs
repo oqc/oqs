@@ -16,7 +16,8 @@ import           Settings.Development as Import
 import           Settings.StaticFiles as Import
 import           Data.IORef           as Import (readIORef)
 import           Data.Map             as Import (Map, (!))
-import           Quran.Types          as Import
+import           Quran.QLines         as Import
+import           Quran.QRefRng        as Import
 
 #if __GLASGOW_HASKELL__ >= 704
 import           Data.Monoid          as Import
