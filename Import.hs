@@ -1,6 +1,8 @@
+{-# LANGUAGE CPP #-}
 module Import
     ( module Import
     ) where
+
 
 import           Prelude              as Import hiding (head, init, last,
                                                  readFile, tail, writeFile)
@@ -30,3 +32,22 @@ infixr 5 <>
 (<>) :: Monoid m => m -> m -> m
 (<>) = mappend
 #endif
+
+
+
+import Yesod.Fay
+import Language.Haskell.TH.Syntax (Exp)
+import System.Process (readProcess)
+import Settings.Development
+
+fayFile' :: Exp -> FayFile
+fayFile' staticR moduleName
+    | development = fayFileReload settings
+    | otherwise   = fayFileProd settings
+  where
+    settings = (yesodFaySettings moduleName)
+        { yfsSeparateRuntime = Just ("static", staticR)
+        -- , yfsPostProcess = readProcess "java" ["-jar", "closure-compiler.jar"]
+        , yfsExternal = Just ("static", staticR)
+        }
+

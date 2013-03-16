@@ -1,8 +1,10 @@
-/static       StaticR     Static  getStatic
-/auth         AuthR       Auth    getAuth
+/static       StaticR     Static   getStatic
+/auth         AuthR       Auth     getAuth
 
 /favicon.ico  FaviconR    GET
 /robots.txt   RobotsR     GET
 
 /v1/meta/ids  IDsR        GET
 /v1/#Text     RefStringR  GET
+
+/fay-command  FaySiteR    FaySite  getFaySite

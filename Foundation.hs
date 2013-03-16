@@ -35,6 +35,8 @@ import Data.Map ( Map )
 import Data.Text
 import Data.IORef
 import Quran.Types
+import SharedTypes
+import Yesod.Fay
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -124,6 +126,18 @@ instance Yesod App where
     jsLoader _ = BottomOfBody
 
 
+instance YesodJquery App
+instance YesodFay App where
+    type YesodFayCommand App = Command
+
+    fayRoute = FaySiteR
+
+    yesodFayCommand render command =
+        case readFromFay command of
+            Just (RollDie r) -> render r "Four" -- guaranteed to be random, see http://xkcd.com/221/
+            Nothing -> invalidArgs ["Invalid command"]
+
+
 -- How to run database actions.
 instance YesodPersist App where
     type YesodPersistBackend App = SqlPersist
@@ -133,6 +147,7 @@ instance YesodPersist App where
             (persistConfig master)
             f
             (connPool master)
+
 
 instance YesodAuth App where
     type AuthId App = UserId
