@@ -14,10 +14,12 @@ import           Model                as Import
 import           Settings             as Import
 import           Settings.Development as Import
 import           Settings.StaticFiles as Import
+-- non scaffolded imports below
 import           Data.IORef           as Import (readIORef)
 import           Data.Map             as Import (Map, (!))
 import           Quran.QLines         as Import
 import           Quran.QRefRng        as Import
+
 
 #if __GLASGOW_HASKELL__ >= 704
 import           Data.Monoid          as Import

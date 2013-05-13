@@ -50,7 +50,7 @@ getRefStringR refs = do
       let result = map (\refRng -> (show refRng, map (\qtf -> qtfRngToQlf qpf defaultBrkToText qtf refRng) qtfs))
                        (concat $ map (applyGrpStyleToRng grpStyle qpf) refRngs)
 
-      jsonToRepJson $ map (\(k, v) -> [toJSON k, toJSON v]) result
+      return . RepJson . toContent . toJSON $ map (\(k, v) -> [toJSON k, toJSON v]) result
 
 
 getIDsR :: Handler RepJson
@@ -58,7 +58,7 @@ getIDsR = do
   yesod <- getYesod
   qtfMap <- liftIO $ readIORef $ getQtfMap yesod
   qpfMap <- liftIO $ readIORef $ getQpfMap yesod
-  jsonToRepJson . object $ ["qtfs" .= (M.keys qtfMap), "qpfs" .= (M.keys qpfMap)]
+  return . RepJson . toContent . toJSON . object $ ["qtfs" .= (M.keys qtfMap), "qpfs" .= (M.keys qpfMap)]
 
 
 
