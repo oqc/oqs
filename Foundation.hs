@@ -88,9 +88,12 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         pc <- widgetToPageContent $ do
+            addScriptRemote "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
+            addScriptRemote "http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"
+            addScriptRemote "https://raw.github.com/BinaryMuse/ngInfiniteScroll/master/build/ng-infinite-scroll.min.js"
+            addScriptRemote "http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"
             $(combineStylesheets 'StaticR
-                [ css_normalize_css
-                , css_bootstrap_css
+                [ css_bootstrap_combined_min_css
                 ])
             $(widgetFile "default-layout")
         hamletToRepHtml $(hamletFile "templates/default-layout-wrapper.hamlet")

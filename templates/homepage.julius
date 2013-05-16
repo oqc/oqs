@@ -1,1 +1,31 @@
-document.getElementById(#{toJSON aDomId}).innerHTML = "This text was added by the Javascript part of the homepage widget.";
+var oqsClientApp = angular.module('oqsClientApp', ['infinite-scroll']);
+oqsClientApp.controller('MainController', function($scope, $http /*, $sanitize <- super unsafe w/o this */) {
+  $scope.rows = [];
+  $scope.busy = false;
+  $scope.searchQuery = '1:1-7,2:256-265';
+  $scope.settings = {t: "ROWtnNs1uRc,ROWtnNs1uRc", p: "3vqhfCMZ3oE", g: "b" /* r b a v */ };
+  $scope.nextPage = function() {
+    if ($scope.busy) return;
+    $scope.busy = true;
+    var url = "http://0.0.0.0:3000/v1/" + $scope.searchQuery + "?" + $.param($scope.settings);
+    $http.get(url).success(function(groups) {
+      for (var g = 0; g < groups.length; g++) {
+        var group = groups[g];
+        var result = "";
+        for (var t = 0; t < group[1].length; t++) {
+          var html = group[1][t].replace(/\\br/g, "<br/>");
+          html     = html.replace(/\\bbr/g, "<br class='big'/>");
+          html     = html.replace(/\\nr\{(\d+):(\d+)\}/g, "<span class='nr'><span class='cnr'>$1:</span>$2</span>");
+          result  += "<div class='text-" + t + "'>" + html + "</div>";
+        }
+        $scope.rows.push("<div class='group-" + group[0].replace(":", "-") + "'><h2>" + group[0] + "</h2>" + result + "</div>");
+      }
+      $scope.busy = false;
+    });
+  };
+  $scope.newSearch = function() {
+    $scope.searchQuery = $('form.navbar-search input').val();
+    $scope.rows = [];
+    $scope.nextPage();
+  };
+});
